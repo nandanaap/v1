@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise for You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 15% 10%, rgba(255,255,255,0.85), transparent 18%),
+                linear-gradient(135deg, #ffdfe9 0%, #fff1f6 40%, #fff8fb 100%);
+            font-family: 'Poppins', 'Georgia', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            transition: background 0.6s ease;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 820px;
+            padding: 2.5rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,246,250,0.95));
+            border-radius: 28px;
+            box-shadow: 0 12px 40px rgba(214, 56, 122, 0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+            border: 1px solid rgba(233, 62, 140, 0.06);
+            animation: fadeIn 700ms ease-in-out;
+            transform-origin: center top;
+            transition: transform 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.6s;
+        }
+
+        .container.hidden { opacity: 0; transform: translateY(20px) scale(0.99); }
+        .container.revealed { transform: translateY(0) scale(1); opacity: 1; }
+
+        h1 {
+            color: #d63384;
+            font-size: 3.6rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Great Vibes', cursive;
+            text-shadow: 0 6px 22px rgba(214, 56, 122, 0.08);
+        }
+
+        .heart {
+            color: #e91e63;
+            font-size: 2.2rem;
+            animation: heartbeat 1.5s ease-in-out infinite;
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .message {
+            font-size: 1.15rem;
+            color: #5b4b57;
+            line-height: 1.8;
+            margin: 1.6rem 0;
+        }
+
+        .appreciation {
+            background: linear-gradient(45deg, #ff8fb3, #ff6b6b);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 14px;
+            margin: 1.8rem 0;
+            font-size: 1.05rem;
+            box-shadow: 0 12px 30px rgba(255,107,107,0.12);
+        }
+
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: visible;
+        }
+
+        .floating-heart {
+            position: absolute;
+            will-change: transform, opacity;
+            pointer-events: none;
+            animation: float 6s linear infinite;
+            opacity: 0.8;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        .signature {
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 2rem;
+            font-size: 1.05rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #ff7aa2, #ff6b6b);
+            color: white;
+            padding: 13px 34px;
+            border: none;
+            border-radius: 999px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: transform 0.25s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 24px rgba(255,107,107,0.18);
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 18px 44px rgba(255,107,107,0.22);
+        }
+
+        /* Hidden until reveal date */
+        .hidden { display: none !important; }
+
+        #surpriseImage {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-top: 1.25rem;
+            display: block;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        #surpriseImage.shown { opacity: 1; transform: scale(1); }
+
+        #countdown {
+            font-size: 1.4rem;
+            color: #d63384;
+            margin-top: 1rem;
+        }
+
+        #surpriseMessage {
+            margin-top: 1rem;
+            font-size: 1.6rem;
+            color: #e83e8c;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #surpriseMessage.revealed { opacity: 1; transform: translateY(0); }
+
+        /* Countdown box styling (runs away) */
+        .countdown-box {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: inline-block;
+            background: linear-gradient(180deg, rgba(232, 62, 140, 0.04), rgba(255,255,255,0.02));
+            border: 1px solid rgba(232, 62, 140, 0.12);
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            backdrop-filter: blur(4px);
+            z-index: 30;
+            transition: left 160ms ease, top 160ms ease, transform 160ms ease;
+            cursor: default;
+        }
+
+        .to-akhil {
+            margin-top: 0.45rem;
+            font-style: italic;
+            color: #6c757d;
+            font-size: 0.95rem;
+            transition: transform 0.45s ease; 
+        }
+        .to-akhil.pop { transform: scale(1.06); color: #d63384; }
+
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            width: 8px;
+            height: 12px;
+            opacity: 0.95;
+            z-index: 9999;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Hidden until reveal date */
+        .hidden { display: none !important; }
+
+        #surpriseImage {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 1.25rem;
+            display: block;
+        }
+
+        #countdown {
+            font-size: 1.4rem;
+            color: #d63384;
+            margin-top: 1rem;
+        }
+
+        #surpriseMessage {
+            margin-top: 1rem;
+            font-size: 1.6rem;
+            color: #e83e8c;
+            font-weight: bold;
+        }
+
+        /* Countdown box styling (runs away) */
+        .countdown-box {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: inline-block;
+            background: linear-gradient(180deg, rgba(232, 62, 140, 0.04), rgba(255,255,255,0.02));
+            border: 1px solid rgba(232, 62, 140, 0.12);
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            backdrop-filter: blur(3px);
+            z-index: 30;
+            transition: left 160ms ease, top 160ms ease, transform 160ms ease;
+            cursor: default;
+        }
+
+        .to-akhil {
+            margin-top: 0.45rem;
+            font-style: italic;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="hearts"></div>
+    
+    <div class="countdown-box" id="countdownBox" style="margin:1rem 0; text-align:center;">
+        <div id="visibleCountdown" style="font-size:1.2rem;color:#e83e8c; padding:0.5rem 0;"></div>
+        <div id="toAkhil" class="to-akhil">To Akhil — With love, Nandana</div>
+    </div>
+
+    <div class="container hidden" id="surpriseCard">
+        <h1>Happy Valentine's Day</h1>
+        <div class="heart">�</div>
+        <h2 style="color: #d63384; margin-bottom: 2rem;">My Dearest Akhil</h2>
+
+        <!-- Surprise elements: initially hidden until Feb 14 -->
+        <img id="surpriseImage" src="us.jpeg" alt="Us" style="display:none;">
+        <div id="countdown" style="display:none;"></div>
+        <div id="surpriseMessage" style="display:none;"></div>
+        
+        <div class="message">
+            Every day with you feels like a beautiful dream come true. 
+            Your smile lights up my world, and your love makes everything better.
+        </div>
+        
+        <div class="appreciation">
+            <h3 style="margin-bottom: 1rem;">What I Love About You:</h3>
+            <p>💕 Your kind and caring heart</p>
+            <p>✨ The way you make me laugh every day</p>
+            <p>🌟 Your incredible support and understanding</p>
+            <p>💖 How you make ordinary moments feel magical</p>
+            <p>🥰 Your beautiful soul that makes me fall for you more each day</p>
+        </div>
+        
+        <div class="message">
+            Thank you for being my partner, my best friend, and my greatest love. 
+            I'm so grateful to have you in my life, and I can't wait to create 
+            more beautiful memories together.
+        </div>
+        
+        <button class="btn" onclick="showSurprise()">Click for a Special Message! 💕</button>
+        
+        <div class="signature">
+            With all my love,<br>
+            Your Valentine 💕
+        </div>
+    </div>
+
+    <script>
+        // Create floating hearts (cuter, random sizes/colors)
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            const choices = ['�'];
+            heart.innerHTML = choices[Math.floor(Math.random() * choices.length)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.fontSize = (12 + Math.random() * 36) + 'px';
+            const colors = ['#ff6b8a','#ff9bb3','#ff4d6d','#ffb6c1'];
+            heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+            heart.style.opacity = (0.45 + Math.random() * 0.55).toFixed(2);
+            heart.style.animationDelay = Math.random() * 3 + 's';
+            heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            document.getElementById('hearts').appendChild(heart);
+            
+            setTimeout(() => {
+                heart.remove();
+            }, 12000);
+        }
+
+        // Create hearts periodically
+        setInterval(createHeart, 800);
+
+        // Special surprise message
+        function showSurprise() {
+            alert("Akhil, you are my sunshine, my happiness, and my forever! I love you more than words can express! 💕✨🥰");
+        }
+
+        // Create initial hearts
+        for(let i = 0; i < 5; i++) {
+            setTimeout(createHeart, i * 200);
+        }
+
+        // Confetti utilities
+        function createConfettiPiece() {
+            const d = document.createElement('div');
+            d.className = 'confetti-piece';
+            const colors = ['#FF6B6B','#FFC75F','#7BE495','#60A5FA','#C77DFF'];
+            d.style.background = colors[Math.floor(Math.random() * colors.length)];
+            d.style.left = Math.random() * 100 + 'vw';
+            d.style.top = (Math.random() * 10 - 10) + 'vh';
+            d.style.width = (6 + Math.random() * 8) + 'px';
+            d.style.height = (8 + Math.random() * 10) + 'px';
+            d.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+            const dur = 2000 + Math.random() * 2600;
+            d.style.animation = `confettiFall ${dur}ms linear forwards`;
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), dur + 200);
+        }
+
+        function confettiBurst(count = 80) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(createConfettiPiece, i * 10);
+            }
+        }
+
+        // ---- Hidden countdown & reveal logic ----
+        (function() {
+            const now = new Date();
+            const year = now.getFullYear();
+            // Target: Feb 14 (month index 1)
+            const target = new Date(year, 1, 14, 0, 0, 0, 0);
+
+            // If current date is after Feb 14 for this year, reveal immediately.
+            if (now >= target) {
+                revealSurprise();
+                return;
+            }
+
+            // Otherwise schedule reveal at target date
+            const msUntil = target - now;
+            setTimeout(revealSurprise, msUntil);
+
+            // (Optional) keep the countdown logic ready (kept hidden per request)
+            const countdownEl = document.getElementById('countdown');
+            const visibleCountdownEl = document.getElementById('visibleCountdown');
+            function updateCountdown() {
+                const now2 = new Date();
+                const t = target - now2;
+                if (t <= 0) {
+                    countdownEl.textContent = "00:00:00";
+                    if (visibleCountdownEl) visibleCountdownEl.textContent = "It's Valentine's Day! 🎉";
+                    return;
+                }
+                const days = Math.floor(t / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((t / (1000 * 60)) % 60);
+                const seconds = Math.floor((t / 1000) % 60);
+                const timeStr = (days ? days + 'd ' : '') +
+                    String(hours).padStart(2,'0') + ':' +
+                    String(minutes).padStart(2,'0') + ':' +
+                    String(seconds).padStart(2,'0');
+                countdownEl.textContent = timeStr;
+                if (visibleCountdownEl) visibleCountdownEl.textContent = timeStr;
+            }
+            // Update countdown every second
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+
+            // Make countdown box run away from the mouse cursor (desktop only)
+            (function attachRunAway() {
+                const box = document.getElementById('countdownBox');
+                if (!box) return;
+                // Skip behavior on touch devices
+                if ('ontouchstart' in window || navigator.maxTouchPoints > 0) return;
+
+                // Initialize exact pixel position
+                const rect = box.getBoundingClientRect();
+                const initialLeft = Math.round((window.innerWidth - rect.width) / 2);
+                box.style.left = initialLeft + 'px';
+                box.style.top = Math.max(16, rect.top) + 'px';
+                box.style.transform = 'translate(0,0)';
+
+                const margin = 12;
+                const threshold = 160; // px: distance at which box starts to move
+                let lastMove = 0;
+
+                function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+                function onMove(e) {
+                    const now = Date.now();
+                    if (now - lastMove < 40) return; // throttle
+                    lastMove = now;
+                    const mx = e.clientX;
+                    const my = e.clientY;
+                    const r = box.getBoundingClientRect();
+                    const cx = r.left + r.width / 2;
+                    const cy = r.top + r.height / 2;
+                    const dx = cx - mx;
+                    const dy = cy - my;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist > threshold) return; // far away, do nothing
+                    const nx = dx / (dist || 1);
+                    const ny = dy / (dist || 1);
+                    const push = (threshold - dist) + 140 + Math.random() * 60;
+                    let targetLeft = r.left + nx * push;
+                    let targetTop = r.top + ny * push;
+                    const maxLeft = window.innerWidth - r.width - margin;
+                    const maxTop = window.innerHeight - r.height - margin;
+                    targetLeft = clamp(targetLeft, margin, maxLeft);
+                    targetTop = clamp(targetTop, margin, maxTop);
+                    box.style.left = Math.round(targetLeft) + 'px';
+                    box.style.top = Math.round(targetTop) + 'px';
+                }
+
+                document.addEventListener('mousemove', onMove);
+                window.addEventListener('resize', () => {
+                    const r2 = box.getBoundingClientRect();
+                    const maxLeft = window.innerWidth - r2.width - margin;
+                    const maxTop = window.innerHeight - r2.height - margin;
+                    let left = parseFloat(box.style.left) || r2.left;
+                    let top = parseFloat(box.style.top) || r2.top;
+                    left = clamp(left, margin, maxLeft);
+                    top = clamp(top, margin, maxTop);
+                    box.style.left = left + 'px';
+                    box.style.top = top + 'px';
+                });
+            })();
+
+            function revealSurprise() {
+                const card = document.getElementById('surpriseCard');
+                const img = document.getElementById('surpriseImage');
+                const msg = document.getElementById('surpriseMessage');
+                const countdown = document.getElementById('countdown');
+                const hearts = document.getElementById('hearts');
+                const visibleCountdownEl = document.getElementById('visibleCountdown');
+                const toAkhil = document.getElementById('toAkhil');
+
+                // Reveal the card and surprise elements with animations
+                if (card) {
+                    card.classList.remove('hidden');
+                    card.classList.add('revealed');
+                }
+                if (hearts) hearts.classList.remove('hidden');
+                if (img) { img.style.display = 'block'; setTimeout(() => img.classList.add('shown'), 40); }
+                if (countdown) countdown.style.display = 'block';
+                if (visibleCountdownEl) visibleCountdownEl.textContent = "Happy Valentine's Day! 🎉";
+                if (msg) {
+                    msg.style.display = 'block';
+                    setTimeout(() => msg.classList.add('revealed'), 80);
+                    msg.textContent = "🎉 Surprise! Happy Valentine's Day, Akhil! 🎉";
+                }
+
+                // animate signature
+                if (toAkhil) {
+                    toAkhil.classList.add('pop');
+                    setTimeout(() => toAkhil.classList.remove('pop'), 1400);
+                }
+
+                // Confetti and extra hearts for celebration
+                confettiBurst(90);
+                for (let i = 0; i < 28; i++) {
+                    setTimeout(createHeart, i * 80);
+                }
+            }
+        })();
+
+    </script>
+</body>
+</html>
